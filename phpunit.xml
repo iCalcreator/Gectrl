@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Gectrl, PHP generic controller
+
+ Copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ Link      https://kigkonsult.se
+ Package   Gectrl
+ Version   1.0
+ License   Subject matter of licence is the software Gectrl.
+           The above copyright, link, package and version notices,
+           this licence notice shall be included in all copies or
+           substantial portions of the Gectrl.
+
+           Gectrl is free software: you can redistribute it and/or modify
+           it under the terms of the GNU Lesser General Public License as
+           published by the Free Software Foundation, either version 3 of
+           the License, or (at your option) any later version.
+
+           Gectrl is distributed in the hope that it will be useful,
+           but WITHOUT ANY WARRANTY; without even the implied warranty of
+           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+           GNU Lesser General Public License for more details.
+
+           You should have received a copy of the
+           GNU Lesser General Public License
+           along with Gectrl.
+           If not, see <https://www.gnu.org/licenses/>.
+
+ This file is a part of Gectrl.
+-->
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="true"
+         syntaxCheck="false"
+         bootstrap="autoload.php">
+    <testsuites>
+        <testsuite name="Gectrl Tests">
+            <file>./test/PackageTest.php</file>
+            <file>./test/GectrlTest.php</file>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist
+                addUncoveredFilesFromWhitelist="true"
+                processUncoveredFilesFromWhitelist="true"
+        >
+            <file>./src/ActionClassInterface.php</file>
+            <file>./src/Gectrl.php</file>
+            <file>./src/Package.php</file>
+        </whitelist>
+    </filter>
+    <logging>
+        <!-- Remove or comment after your own choice-->
+        <!-- All logs will be saved in 'testDocs' folder -->
+
+        <log type="coverage-html"
+             target="testDocs/PHPUnitCoverage"
+             lowUpperBound="35"
+             highLowerBound="70"/>
+        <!--log type="coverage-clover"
+             target="testDocs/coverage.xml"/-->
+        <!--log type="coverage-php"
+             target="testDocs/coverage.serialized"/-->
+        <log type="coverage-text"
+             target="testDocs/PHPUnitReport.txt"
+             showUncoveredFiles="true"/>
+        <!--log type="json"
+             target="testDocs/logfile.json"/-->
+        <!--log type="tap"
+             target="testDocs/logfile.tap"/-->
+        <!--log type="junit"
+             target="testDocs/logfile.xml"
+             logIncompleteSkipped="false"/-->
+        <!--log type="testdox-html"
+             target="testDocs/testdox.html"/-->
+        <!--log type="testdox-text"
+             target="testDocs/testdox.txt"/-->
+    </logging>
+</phpunit>
