@@ -9,6 +9,10 @@
       "email": "ical@kigkonsult.se"
     }
   ],
+    "autoload": {
+        "files": ["autoload.php"],
+        "psr-4": { "Kigkonsult\\Gectrl\\": ["src/"] }
+    },
   "require": {
     "php": "^7.0",
     "ext-mbstring": "*",
