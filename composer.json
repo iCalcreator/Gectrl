@@ -1,24 +1,33 @@
 {
-  "name": "kigkonsult/gectrl",
-  "description": "Generic controller, MVC",
-  "minimum-stability": "stable",
-  "license": "LGPL-3.0-or-later",
-  "authors": [
-    {
-      "name": "Kjell-Inge Gustafsson",
-      "email": "ical@kigkonsult.se"
-    }
-  ],
+    "name": "kigkonsult/gectrl",
+    "description": "Generic controller, MVC",
+    "minimum-stability": "stable",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Kjell-Inge Gustafsson",
+            "email": "ical@kigkonsult.se"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/iCalcreator/gectrl/issues"
+    },
+    "funding": [
+        {
+            "type": "other",
+            "url": "https://paypal.me/kigkonsult"
+        }
+    ],
     "autoload": {
         "files": ["autoload.php"],
         "psr-4": { "Kigkonsult\\Gectrl\\": ["src/"] }
     },
-  "require": {
-    "php": "^7.0",
-    "ext-mbstring": "*",
-    "kigkonsult/keyvaluemgr": "dev-master"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "6.5.14"
-  }
+    "require": {
+        "php": "^7.0",
+        "ext-mbstring": "*",
+        "kigkonsult/keyvaluemgr": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "6.5.14"
+    }
 }
