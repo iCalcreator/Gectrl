@@ -2,31 +2,29 @@
 /**
  * Gectrl, PHP generic controller
  *
- * Copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
- * Link      https://kigkonsult.se
- * Package   Gectrl
- * Version   1.0
- * License   Subject matter of licence is the software Gectrl.
- *           The above copyright, link, package and version notices,
- *           this licence notice shall be included in all copies or
- *           substantial portions of the Gectrl.
- *
- *           Gectrl is free software: you can redistribute it and/or modify
- *           it under the terms of the GNU Lesser General Public License as
- *           published by the Free Software Foundation, either version 3 of
- *           the License, or (at your option) any later version.
- *
- *           Gectrl is distributed in the hope that it will be useful,
- *           but WITHOUT ANY WARRANTY; without even the implied warranty of
- *           MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *           GNU Lesser General Public License for more details.
- *
- *           You should have received a copy of the
- *           GNU Lesser General Public License
- *           along with Gectrl.
- *           If not, see <https://www.gnu.org/licenses/>.
- *
  * This file is a part of Gectrl.
+ *
+ * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
+ * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @link      https://kigkonsult.se
+ * @version   1.2
+ * @license   Subject matter of licence is the software Gectrl.
+ *            The above copyright, link, package and version notices,
+ *            this licence notice shall be included in all copies or substantial
+ *            portions of the Gectrl.
+ *
+ *            Gectrl is free software: you can redistribute it and/or modify
+ *            it under the terms of the GNU Lesser General Public License as
+ *            published by the Free Software Foundation, either version 3 of
+ *            the License, or (at your option) any later version.
+ *
+ *            Gectrl is distributed in the hope that it will be useful,
+ *            but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *            GNU Lesser General Public License for more details.
+ *
+ *            You should have received a copy of the GNU Lesser General Public License
+ *            along with Gectrl. If not, see <https://www.gnu.org/licenses/>.
  */
 declare( strict_types = 1 );
 namespace Kigkonsult\Gectrl;
@@ -168,7 +166,7 @@ class Package
         static $EXCL     = '{}';
         static $FMTGUID  = '%04X%04X-%04X-%04X-%04X-%04X%04X%04X';
         return ( true === function_exists( $FUNCTION ))
-            ? trim( com_create_guid(), $EXCL )
+            ? trim( $FUNCTION(), $EXCL )
             : sprintf(
                 $FMTGUID,
                 mt_rand( 0, 65535 ),
@@ -444,7 +442,7 @@ class Package
      * @param string $key
      * @return KeyValueMgr|mixed|bool
      */
-    public function getResultLog( $key = null )
+    public function getResultLog( string $key = null )
     {
         switch( true ) {
             case empty( $key ) :
@@ -502,7 +500,7 @@ class Package
     /**
      * Return string, property load status, eol-separated
      */
-    public function getLoadStatus()
+    public function getLoadStatus() : string
     {
         static $PROPNAMES = [
             'timeStamp : ',
