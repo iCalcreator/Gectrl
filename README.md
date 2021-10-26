@@ -75,6 +75,8 @@ In your composer.json:
 }
 ```
 
+Version 1.6 supports PHP 7.4, 1.4 7.0.
+
 ## Sponsorship
 Donation using [paypal.me/kigkonsult] are appreciated.
 For invoice, [e-mail]</a>.

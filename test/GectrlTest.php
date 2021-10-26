@@ -7,7 +7,6 @@
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
  * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
- * @version   1.2
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
  *            this licence notice shall be included in all copies or substantial
@@ -29,26 +28,27 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\Gectrl;
 
+use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 class GectrlTest extends TestCase
 {
-    private static $VAR1 = 'var1';
-    private static $VAR2 = 'var2';
-    private static $VAR3 = 'var3';
+    private static string $VAR1 = 'var1';
+    private static string $VAR2 = 'var2';
+    private static string $VAR3 = 'var3';
 
     /**
      * Testing Gectrl and Package
      *
      * @test
+     * @throws Exception
      */
-    public function gectrlTest1() {
+    public function gectrlTest1() : void
+    {
         $gectrl   = Gectrl::init( self::$VAR1, self::$VAR2 );
         $package1 = $gectrl->getPackage();
-
-        $this->assertInstanceOf(Package::class, $package1, 'error 111' );
 
         $this->assertTrue( $package1->isConfigSet(), 'error 41' );
         $this->assertEquals( self::$VAR1, $package1->getConfig(), 'error 142');
@@ -87,7 +87,8 @@ class GectrlTest extends TestCase
      *
      * @test
      */
-    public function gectrlTest2() {
+    public function gectrlTest2() : void
+    {
         $actionClasses = [
             AcSrc\OtherInterface::class,
             AcSrc\OtherTrait::class,
@@ -120,10 +121,8 @@ class GectrlTest extends TestCase
             'error 212c'
         );
 
-        $this->assertNotEquals(
-            count(  $actionClasses ),
-            count( $gectrl->getActionClasses()),
-            'error 214'
+        $this->assertNotCount(
+            count( $actionClasses ), $gectrl->getActionClasses(), 'error 214'
         );
 
         $package = $gectrl->main( self::$VAR1 );
@@ -138,7 +137,8 @@ class GectrlTest extends TestCase
      *
      * @test
      */
-    public function gectrlTest3() {
+    public function gectrlTest3() : void
+    {
         $detected = false;
         try {
             $package = Gectrl::init()->main();
@@ -163,7 +163,8 @@ class GectrlTest extends TestCase
      *
      * @test
      */
-    public function gectrlTest4() {
+    public function gectrlTest4() : void
+    {
         $detected = false;
         try {
             $gectrl = Gectrl::init(
@@ -195,8 +196,10 @@ class GectrlTest extends TestCase
      * Testing Gectrl, main, package input
      *
      * @test
+     * @throws Exception
      */
-    public function gectrlTest5() {
+    public function gectrlTest5() : void
+    {
         $package1 = Package::init( self::$VAR1, self::$VAR2, self::$VAR3 );
 
         $package2 = Gectrl::init(

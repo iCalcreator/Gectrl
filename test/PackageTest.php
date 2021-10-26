@@ -7,7 +7,6 @@
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
  * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
- * @version   1.2
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
  *            this licence notice shall be included in all copies or substantial
@@ -29,36 +28,37 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\Gectrl;
 
+use Exception;
 use Kigkonsult\KeyValueMgr\KeyValueMgr;
 use PHPUnit\Framework\TestCase;
 
 class PackageTest extends TestCase
 {
-    private static $VAR1 = 'var1';
-    private static $VAR2 = 'var2';
-    private static $VAR3 = 'var3';
+    private static string $VAR1 = 'var1';
+    private static string $VAR2 = 'var2';
+    private static string $VAR3 = 'var3';
 
     /**
      * Testing Package
      *
      * @test
+     * @throws Exception
      */
-    public function packageTest1() {
+    public function packageTest1() : void
+    {
         $package = Package::init( self::$VAR1, self::$VAR2, self::$VAR3 );
 
-        $this->assertInstanceOf(Package::class, $package, 'error 11' );
-
-        $this->assertTrue( is_float( $package->getTimestamp()), 'error 21' );
+        $this->assertIsFloat( $package->getTimestamp(), 'error 21' );
         $timeStamp = microtime( true );
         $package->setTimestamp( $timeStamp );
-        $this->assertTrue( is_float( $package->getTimestamp()), 'error 22' );
+        $this->assertIsFloat( $package->getTimestamp(), 'error 22' );
         $this->assertEquals(
             number_format( $timeStamp, 6 ),
             number_format( $package->getTimestamp(), 6 ),
             'error 23'
         );
 
-        $this->assertTrue( is_string( $package->getCorrelationId()), 'error 31' );
+        $this->assertIsString( $package->getCorrelationId(), 'error 31' );
         $package->setCorrelationId( self::$VAR3 );
         $this->assertEquals( self::$VAR3, $package->getCorrelationId(), 'error 32');
 

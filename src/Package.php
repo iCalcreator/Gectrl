@@ -7,7 +7,6 @@
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
  * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
- * @version   1.2
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
  *            this licence notice shall be included in all copies or substantial
@@ -29,13 +28,14 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\Gectrl;
 
+use Exception;
 use Kigkonsult\KeyValueMgr\KeyValueMgr;
 
 use function function_exists;
 use function gettype;
 use function implode;
 use function microtime;
-use function mt_rand;
+use function random_int;
 use function number_format;
 use function sprintf;
 use function trim;
@@ -67,42 +67,42 @@ class Package
      *
      * @var float
      */
-    private $timestamp = null;
+    private float $timestamp;
 
     /**
      * Unique guid, default set at instance create
      *
      * @var string
      */
-    private $correlationId = null;
+    private string $correlationId;
 
     /**
      * Opt any config
      *
      * @var mixed
      */
-    private $config = null;
+    private $config;
 
     /**
      * Opt any logger
      *
      * @var mixed
      */
-    private $logger = null;
+    private $logger;
 
     /**
      * Required input (scalar/array/object)
      *
      * @var mixed
      */
-    private $input = null;
+    private $input;
 
     /**
      * Opt output (scalar/array/object)
      *
      * @var mixed
      */
-    private $output = null;
+    private $output;
 
     /**
      * Opt work data, shared between actionClasses
@@ -116,7 +116,7 @@ class Package
      * @link https://github.com/iCalcreator/KeyValueMgr
      * @var KeyValueMgr
      */
-    private $workData = null;
+    private KeyValueMgr $workData;
 
     /**
      * Opt (any) actionClass effect outcome
@@ -130,7 +130,7 @@ class Package
      * @link https://github.com/iCalcreator/KeyValueMgr
      * @var KeyValueMgr
      */
-    private $resultLog = null;
+    private KeyValueMgr $resultLog;
 
     /**
      * Package constructor
@@ -138,6 +138,7 @@ class Package
      * @param mixed $config
      * @param mixed $logger
      * @param mixed $input
+     * @throws Exception
      */
     public function __construct( $config = null, $logger = null, $input = null )
     {
@@ -159,6 +160,7 @@ class Package
     /**
      * @link https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid#26163679
      * @return string
+     * @throws Exception
      */
     public static function getGuid() : string
     {
@@ -169,14 +171,14 @@ class Package
             ? trim( $FUNCTION(), $EXCL )
             : sprintf(
                 $FMTGUID,
-                mt_rand( 0, 65535 ),
-                mt_rand( 0, 65535 ),
-                mt_rand( 0, 65535 ),
-                mt_rand( 16384, 20479 ),
-                mt_rand( 32768, 49151 ),
-                mt_rand( 0, 65535 ),
-                mt_rand( 0, 65535 ),
-                mt_rand( 0, 65535 )
+                random_int( 0, 65535 ),
+                random_int( 0, 65535 ),
+                random_int( 0, 65535 ),
+                random_int( 16384, 20479 ),
+                random_int( 32768, 49151 ),
+                random_int( 0, 65535 ),
+                random_int( 0, 65535 ),
+                random_int( 0, 65535 )
             );
     }
 
@@ -187,6 +189,7 @@ class Package
      * @param mixed $logger
      * @param mixed $input
      * @return Package
+     * @throws Exception
      */
     public static function init( $config = null, $logger = null, $input = null ) : Package
     {
@@ -373,7 +376,7 @@ class Package
      * KeyValueMgr::get( key ) : mixed
      * KeyValueMgr::set( key, value ) : KeyValueMgr
      *
-     * @param string $key
+     * @param string|null $key
      * @return KeyValueMgr|mixed|bool
      */
     public function getWorkData( string $key = null )
@@ -439,7 +442,7 @@ class Package
      * KeyValueMgr::get( key ) : mixed
      * KeyValueMgr::set( key, value ) : KeyValueMgr
      *
-     * @param string $key
+     * @param string|null $key
      * @return KeyValueMgr|mixed|bool
      */
     public function getResultLog( string $key = null )

@@ -7,7 +7,6 @@
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
  * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
- * @version   1.2
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
  *            this licence notice shall be included in all copies or substantial
@@ -29,6 +28,7 @@
 declare( strict_types = 1 );
 namespace Kigkonsult\Gectrl;
 
+use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
@@ -59,16 +59,21 @@ use function usort;
 class Gectrl
 {
     /**
+     * @var callable
+     */
+    private static $SORTER = [ __CLASS__, 'actionClassSort' ];
+
+    /**
      * Array (string[]) FQCNs for actionClasses
      *
      * @var string[]
      */
-    private $actionClasses = [];
+    private array $actionClasses = [];
 
     /**
      * @var Package
      */
-    private $package = null;
+    private Package $package;
 
     /**
      * Gectrl constructor
@@ -76,6 +81,7 @@ class Gectrl
      * @param mixed $config
      * @param mixed $logger
      * @param string[] $actionClasses
+     * @throws Exception
      */
     public function __construct( $config = null, $logger = null, array $actionClasses = [] )
     {
@@ -116,7 +122,6 @@ class Gectrl
      */
     public function main( $input = null ) : Package
     {
-        static $SORTFCN = 'actionClassSort';
         switch( true ) {
             case ( null === $input ) :
                 break;
@@ -128,7 +133,7 @@ class Gectrl
                 break;
         } // end switch
         $this->assert();
-        usort( $this->actionClasses, [ $this, $SORTFCN ] );
+        usort( $this->actionClasses, self::$SORTER );
         foreach( $this->actionClasses as $actionClass ) {
             if( false === $actionClass::{ActionClassInterface::EVALUATE}( $this->package )) {
                 continue;
@@ -165,7 +170,7 @@ class Gectrl
      * @return void
      * @throws RuntimeException
      */
-    private function assert()
+    private function assert() : void
     {
         static $FMT1 = 'No Gectrl input';
         static $FMT2 = 'No Gectrl actions';
@@ -190,13 +195,13 @@ class Gectrl
     /**
      * Return bool, true if actionsClasses (fqcn) is set, otherwise false
      *
-     * @param string $fqcn
+     * @param string|null $fqcn
      * @return bool
      */
     public function isActionClassSet( string $fqcn = null ) : bool
     {
-        if( null !== $fqcn ) {
-            return in_array( $fqcn, $this->actionClasses );
+        if( ! empty( $fqcn )) {
+            return in_array( $fqcn, $this->actionClasses, true );
         }
         return ( ! empty( $this->actionClasses ));
     }
@@ -251,7 +256,7 @@ class Gectrl
             $reflectionClass->isAbstract()) {
             return false;
         }
-        if(( null === $isTrait ) ||
+        if( empty( $isTrait ) || // null|false
             ! $reflectionClass->implementsInterface( ActionClassInterface::class  )) {
             throw new InvalidArgumentException( sprintf( $FMT2, $actionClass ), 22 );
         }
