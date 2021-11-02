@@ -28,15 +28,10 @@
       ]
     }
   },
-    "config": {
-      "platform": {
-        "php": "7.4"
-      }
-    },
     "require": {
-      "php": "<=7.4",
+      "php": ">=8.0",
       "ext-mbstring": "*",
-      "kigkonsult/keyvaluemgr": "*"
+      "kigkonsult/keyvaluemgr": ">=1.8"
   },
   "require-dev": {
     "phpunit/phpunit": ">=6.5.14",

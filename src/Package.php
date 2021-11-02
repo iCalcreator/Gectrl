@@ -81,28 +81,28 @@ class Package
      *
      * @var mixed
      */
-    private $config;
+    private mixed $config;
 
     /**
      * Opt any logger
      *
      * @var mixed
      */
-    private $logger;
+    private mixed $logger;
 
     /**
      * Required input (scalar/array/object)
      *
      * @var mixed
      */
-    private $input;
+    private mixed $input = null;
 
     /**
      * Opt output (scalar/array/object)
      *
      * @var mixed
      */
-    private $output;
+    private mixed $output = null;
 
     /**
      * Opt work data, shared between actionClasses
@@ -140,7 +140,11 @@ class Package
      * @param mixed $input
      * @throws Exception
      */
-    public function __construct( $config = null, $logger = null, $input = null )
+    public function __construct(
+        mixed $config = null,
+        mixed $logger = null,
+        mixed $input = null
+    )
     {
         $this->timestamp     = microtime( true );
         $this->correlationId = self::getGuid();
@@ -191,7 +195,11 @@ class Package
      * @return Package
      * @throws Exception
      */
-    public static function init( $config = null, $logger = null, $input = null ) : Package
+    public static function init(
+        mixed $config = null,
+        mixed $logger = null,
+        mixed $input = null
+    ) : Package
     {
         return new self( $config, $logger, $input );
     }
@@ -245,7 +253,7 @@ class Package
      *
      * @return mixed
      */
-    public function getConfig()
+    public function getConfig() : mixed
     {
         return $this->config;
     }
@@ -266,7 +274,7 @@ class Package
      * @param mixed $config
      * @return Package
      */
-    public function setConfig( $config ) : Package
+    public function setConfig( mixed $config ) : Package
     {
         $this->config = $config;
         return $this;
@@ -277,7 +285,7 @@ class Package
      *
      * @return mixed
      */
-    public function getLogger()
+    public function getLogger() : mixed
     {
         return $this->logger;
     }
@@ -298,7 +306,7 @@ class Package
      * @param mixed $logger
      * @return Package
      */
-    public function setLogger( $logger ) : Package
+    public function setLogger( mixed $logger ) : Package
     {
         $this->logger = $logger;
         return $this;
@@ -309,7 +317,7 @@ class Package
      *
      * @return mixed
      */
-    public function getInput()
+    public function getInput() : mixed
     {
         return $this->input;
     }
@@ -330,7 +338,7 @@ class Package
      * @param mixed $input
      * @return Package
      */
-    public function setInput( $input ) : Package
+    public function setInput( mixed $input ) : Package
     {
         $this->input = $input;
         return $this;
@@ -341,7 +349,7 @@ class Package
      *
      * @return mixed
      */
-    public function getOutput()
+    public function getOutput() : mixed
     {
         return $this->output;
     }
@@ -362,7 +370,7 @@ class Package
      * @param mixed $output  scalar/array/object
      * @return Package
      */
-    public function setOutput( $output ) : Package
+    public function setOutput( mixed $output ) : Package
     {
         $this->output = $output;
         return $this;
@@ -377,9 +385,9 @@ class Package
      * KeyValueMgr::set( key, value ) : KeyValueMgr
      *
      * @param string|null $key
-     * @return KeyValueMgr|mixed|bool
+     * @return mixed KeyValueMgr|mixed|bool
      */
-    public function getWorkData( string $key = null )
+    public function getWorkData( string $key = null ) : mixed
     {
         switch( true ) {
             case empty( $key ) :
@@ -428,7 +436,7 @@ class Package
      * @param mixed $value  scalar/array/object
      * @return Package
      */
-    public function setWorkData( string $key, $value ) : Package
+    public function setWorkData( string $key, mixed $value ) : Package
     {
         $this->workData->set( $key, $value );
         return $this;
@@ -443,9 +451,9 @@ class Package
      * KeyValueMgr::set( key, value ) : KeyValueMgr
      *
      * @param string|null $key
-     * @return KeyValueMgr|mixed|bool
+     * @return mixed  KeyValueMgr|mixed|bool
      */
-    public function getResultLog( string $key = null )
+    public function getResultLog( string $key = null ) : mixed
     {
         switch( true ) {
             case empty( $key ) :
@@ -494,7 +502,7 @@ class Package
      * @param mixed $value   scalar/array/object
      * @return Package
      */
-    public function setResultLog( string $key, $value ) : Package
+    public function setResultLog( string $key, mixed $value ) : Package
     {
         $this->resultLog->set( $key, $value );
         return $this;

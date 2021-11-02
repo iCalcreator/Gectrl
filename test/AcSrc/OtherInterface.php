@@ -30,5 +30,4 @@ namespace Kigkonsult\Gectrl\AcSrc;
 interface OtherInterface
 {
     public const OTHER = 'other';
-
 }

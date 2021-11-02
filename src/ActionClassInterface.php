@@ -59,6 +59,8 @@ interface ActionClassInterface
 {
     /**
      * MUST return an unique EXECORDER (int) number, class (methods) will be invoked in order
+     *
+     * @return int
      */
     public static function getExecOrder() : int;
 

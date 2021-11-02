@@ -83,7 +83,11 @@ class Gectrl
      * @param string[] $actionClasses
      * @throws Exception
      */
-    public function __construct( $config = null, $logger = null, array $actionClasses = [] )
+    public function __construct(
+        mixed $config = null,
+        mixed $logger = null,
+        ? array $actionClasses = []
+    )
     {
         $this->setPackage( new Package( $config, $logger ));
         if( ! empty( $actionClasses )) {
@@ -94,15 +98,16 @@ class Gectrl
     /**
      * Gectrl factory method
      *
-     * @param mixed $config
-     * @param mixed $logger
+     * @param mixed    $config
+     * @param mixed    $logger
      * @param string[] $actionClasses
      * @return Gectrl
+     * @throws Exception
      */
     public static function init(
-        $config = null,
-        $logger = null,
-        array $actionClasses = []
+        mixed $config = null,
+        mixed $logger = null,
+        ? array $actionClasses = []
     ) : Gectrl
     {
         return new self( $config, $logger, $actionClasses );
@@ -120,7 +125,7 @@ class Gectrl
      * @return Package
      * @throws RuntimeException
      */
-    public function main( $input = null ) : Package
+    public function main( mixed $input = null ) : Package
     {
         switch( true ) {
             case ( null === $input ) :
@@ -158,7 +163,7 @@ class Gectrl
     {
         $aeo = $a::getExecOrder();
         $beo = $b::getExecOrder();
-        if( $aeo == $beo ) {
+        if( $aeo === $beo ) {
             return strcasecmp( $a, $b );
         }
         return ( $aeo < $beo ) ? -1 : 1;
@@ -193,12 +198,12 @@ class Gectrl
     }
 
     /**
-     * Return bool, true if actionsClasses (fqcn) is set, otherwise false
+     * Return bool, true if actionsClasses (or fqcn) is set, otherwise false
      *
      * @param string|null $fqcn
      * @return bool
      */
-    public function isActionClassSet( string $fqcn = null ) : bool
+    public function isActionClassSet( ? string $fqcn = null ) : bool
     {
         if( ! empty( $fqcn )) {
             return in_array( $fqcn, $this->actionClasses, true );
@@ -210,7 +215,7 @@ class Gectrl
      * Add (string) actionClass (FQCN)
      *
      * Opt. traits / interfaces / abstract classes are ignored
-     * Throws exception on Reflection, interface or trait error
+     * Throws exception on Reflection error
      *
      * @param string $actionClass   ActionClassInterface class FQCN
      * @return Gectrl
@@ -228,8 +233,8 @@ class Gectrl
      * Asserts actionClass
      *
      * Return true for class implementing ActionClassInterface,
-     *   trait / interface / abstract class false
-     * Throws exception on Reflection, interface or trait error
+     *   trait / interface / abstract class returns false
+     * Throws exception on Reflection error
      *
      * @link https://www.php.net/manual/en/language.operators.type.php#102988
      * @param string $actionClass   ActionClassInterface class FQCN
@@ -239,7 +244,7 @@ class Gectrl
     private static function assertActionClass( string $actionClass  ) : bool
     {
         static $FMT1 = 'Reflectionerror for %s, %s';
-        static $FMT2 = 'Class %s implements NOT ActionClassInterface';
+        static $FMT8 = 'Class %s implements NOT ActionClassInterface';
         try {
             $reflectionClass = new ReflectionClass( $actionClass );
         }
@@ -250,15 +255,17 @@ class Gectrl
                 $re
             );
         }
-        $isTrait = $reflectionClass->isTrait();
-        if(( true === $isTrait ) ||
-            $reflectionClass->isInterface() ||
-            $reflectionClass->isAbstract()) {
-            return false;
-        }
-        if( empty( $isTrait ) || // null|false
-            ! $reflectionClass->implementsInterface( ActionClassInterface::class  )) {
-            throw new InvalidArgumentException( sprintf( $FMT2, $actionClass ), 22 );
+        switch( true ) {
+            case ( true === $reflectionClass->isTrait()):
+                return false;
+            case $reflectionClass->isInterface() :
+                return false;
+            case $reflectionClass->isAbstract() :
+                return false;
+            case $reflectionClass->implementsInterface( ActionClassInterface::class  ) :
+                break;
+            default :
+                throw new InvalidArgumentException( sprintf( $FMT8, $actionClass ), 28 );
         }
         return true;
     }
