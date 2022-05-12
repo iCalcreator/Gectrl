@@ -8,10 +8,7 @@ A transaction data information encapsulated package class with
 * unique timestamp and guid (default set at instance creation)
 
   
-* opt config and logger(s)
-
-  
-* any kind of (_scalar_ / _array_ / _object_) __input__ and actionClasses __output__
+* any kind of (_scalar_ / _array_ / _object_) __input__ and [ActionClassInterface] class __output__
 
   
 * intermediate (tmp/work) data
@@ -26,22 +23,18 @@ The Package class instance argument is always passed as reference when the [Gect
 Package is internally using [KeyValueMgr] for workData and resultLog (below) and is to recommend as config. 
 
 
-#### Class common methods
+#### Class construct methods
 
 ```
-__construct( [ config [, logger [, input ]]] )
+__construct( [ input ] )
 ```
 * Package constructor
-* ```config``` _mixed_
-* ```logger``` _mixed_
 * ```input``` _mixed_ 
 
 
 ```
-init( [ config [, logger [, input ]]] )
+init( [ input ] )
 ```
-* ```config``` _mixed_
-* ```logger``` _mixed_
 * ```input``` _mixed_
 * Return Package class instance
 * _static_
@@ -84,50 +77,6 @@ setCorrelationId( correlationId )
 ```
 * Set (replace) correlationId (guid)
 * ```correlationId``` string
-* Return _static_
-
-___
-
-**config**
-* valueType : _mixed_
-* Opt any config
-
-```
-getConfig()
-```
-* Return _mixed_ (object passed as reference)
-
-```
-isConfigSet()
-```
-* Return _bool_, true if config is set, otherwise false
-
-```
-setConfig( config )
-```
-* ```config``` _mixed_
-* Return _static_
-
-___
-
-**logger** 
-* valueType : _mixed_
-* Opt any logger
-
-```
-getLogger()
-```
-* Return _mixed_ (object passed as reference)
-
-```
-isLoggerSet()
-```
-* Return _bool_, true if logger is set, otherwise false
-
-```
-setLogger( logger )
-```
-* ```logger``` _mixed_
 * Return _static_
 
 ___
@@ -244,10 +193,17 @@ setResultLog( key, value )
 * Return _static_
 
 ---
+
+**toString method**
+```
+getLoadStatus()
+```
+* Return _string_
+
+---
 Go to [README], [ActionClassInterface], [Gectrl] docs.
 
 [ActionClassInterface]:ActionClassInterface.md
 [Gectrl]:Gectrl.md
 [KeyValueMgr]:https://github.com/iCalcreator/KeyValueMgr
 [README]:../README.md
-

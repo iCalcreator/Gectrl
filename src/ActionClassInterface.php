@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
@@ -73,22 +73,28 @@ interface ActionClassInterface
     /**
      * Evaluates application logic invoke condition
      *
-     * Argument Package is passed as reference
+     * Argument Package is passed as reference along with opt. config/logger
      * A bool true return will cause Gectrl to invoke the 'doAction' method (below), false not
      *
      * @param Package $package
+     * @param mixed $config
+     * @param mixed $logger
      * @return bool
+     * @since 20220509 1.8.2
      */
-    public static function evaluate( Package $package ) : bool;
+    public static function evaluate( Package $package, mixed $config = null, mixed $logger = null ) : bool;
 
     /**
      * Application logic, will be invoked if method evaluate (above) return true
      *
-     * Argument Package is passed as reference
-     * A (bool) true return (here) will force exec break and Gectrl to return the package
+     * Argument Package is passed as reference along with opt. config/logger
+     * A (bool) true return will force exec break and Gectrl to return the package
      *
      * @param Package $package
+     * @param mixed $config
+     * @param mixed $logger
      * @return bool
+     * @since 20220509 1.8.2
      */
-    public static function doAction( Package $package ) : bool;
+    public static function doAction( Package $package, mixed $config = null, mixed $logger = null ) : bool;
 }

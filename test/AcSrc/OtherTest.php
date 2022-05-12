@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,

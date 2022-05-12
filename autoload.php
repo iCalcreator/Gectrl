@@ -5,9 +5,8 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
- * @version   1.2
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
  *            this licence notice shall be included in all copies or substantial
@@ -33,26 +32,17 @@ spl_autoload_register(
         static $PREFIX  = 'Kigkonsult\\Gectrl\\';
         static $SRC     = 'src';
         static $SRCDIR  = null;
-        static $TEST    = 'test';
-        static $TESTDIR = null;
-        if( is_null( $SRCDIR )) {
-            $SRCDIR  = __DIR__ . DIRECTORY_SEPARATOR . $SRC . DIRECTORY_SEPARATOR;
-            $TESTDIR = __DIR__ . DIRECTORY_SEPARATOR . $TEST . DIRECTORY_SEPARATOR;
-        }
         if( 0 != strncmp( $PREFIX, $class, 18 ))
             return false;
         $class = substr( $class, 18 );
         if( false !== strpos( $class, $BS ))
             $class = str_replace( $BS, DIRECTORY_SEPARATOR, $class );
+        if( null === $SRCDIR ) {
+            $SRCDIR  = __DIR__ . DIRECTORY_SEPARATOR . $SRC . DIRECTORY_SEPARATOR;
+        }
         $file = $SRCDIR . $class . $PHP;
         if( file_exists( $file )) {
             include $file;
-        }
-        else {
-            $file = $TESTDIR . $class . $PHP;
-            if( file_exists( $file )) {
-                include $file;
-            }
         }
     }
 );

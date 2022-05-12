@@ -2,16 +2,15 @@
 
 # Gectrl
 
-## About
-
 Gectrl is a PHP generic controller class package
 
 * Supports the MVC software design pattern
 * Distinguish controller and application logic using a strategy pattern
   
-The controller provides coordination logic
+The controller
+* provides coordination logic
+* delegates application logic to actionClasses
 
-The controller delegates application logic to actionClasses
 
 * using implementations of the (strategy) [ActionClassInterface],
 * invoking of actionClass condition **evaluate** and opt, logic **doAction** methods,
@@ -79,7 +78,7 @@ Version 1.8 supports PHP 8, 1.6 7.4, 1.4 7.0.
 
 ## Sponsorship
 Donation using [paypal.me/kigkonsult] are appreciated.
-For invoice, [e-mail]</a>.
+For invoice, please email</a>.
 
 ## Licence
 
@@ -87,7 +86,6 @@ Gectrl is licensed under the LGPLv3 License.
 
 [ActionClassInterface]:docs/ActionClassInterface.md
 [Composer]:https://getcomposer.org/
-[e-mail]:mailto:ical@kigkonsult.se
 [Gectrl]:docs/Gectrl.md
 [paypal.me/kigkonsult]:https://paypal.me/kigkonsult
 [Package]:docs/Package.md

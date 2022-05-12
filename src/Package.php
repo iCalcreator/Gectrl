@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
@@ -31,14 +31,9 @@ namespace Kigkonsult\Gectrl;
 use Exception;
 use Kigkonsult\KeyValueMgr\KeyValueMgr;
 
-use function function_exists;
 use function gettype;
-use function implode;
 use function microtime;
-use function random_int;
 use function number_format;
-use function sprintf;
-use function trim;
 
 /**
  * Class Package
@@ -59,6 +54,7 @@ use function trim;
  *   and is to recommend as config.
  *
  * @package Kigkonsult\Gectrl
+ * @since 20220509 1.8.2
  */
 class Package
 {
@@ -77,30 +73,16 @@ class Package
     private string $correlationId;
 
     /**
-     * Opt any config
-     *
-     * @var mixed
-     */
-    private mixed $config;
-
-    /**
-     * Opt any logger
-     *
-     * @var mixed
-     */
-    private mixed $logger;
-
-    /**
      * Required input (scalar/array/object)
      *
-     * @var mixed
+     * @var null|mixed
      */
     private mixed $input = null;
 
     /**
      * Opt output (scalar/array/object)
      *
-     * @var mixed
+     * @var null|mixed
      */
     private mixed $output = null;
 
@@ -135,73 +117,32 @@ class Package
     /**
      * Package constructor
      *
-     * @param mixed $config
-     * @param mixed $logger
      * @param mixed $input
      * @throws Exception
+     * @since 20220509 1.8.2
      */
-    public function __construct(
-        mixed $config = null,
-        mixed $logger = null,
-        mixed $input = null
-    )
+    public function __construct( mixed $input = null )
     {
         $this->timestamp     = microtime( true );
-        $this->correlationId = self::getGuid();
-        if( null !== $config ) {
-            $this->config = $config;
-        }
-        if( null !== $logger ) {
-            $this->logger = $logger;
-        }
+        $this->correlationId = Util::getGuid();
         if( null !== $input ) {
-            $this->input = $input;
+            $this->input     = $input;
         }
-        $this->workData  = new KeyValueMgr();
-        $this->resultLog = new KeyValueMgr();
-    }
-
-    /**
-     * @link https://stackoverflow.com/questions/21671179/how-to-generate-a-new-guid#26163679
-     * @return string
-     * @throws Exception
-     */
-    public static function getGuid() : string
-    {
-        static $FUNCTION = 'com_create_guid';
-        static $EXCL     = '{}';
-        static $FMTGUID  = '%04X%04X-%04X-%04X-%04X-%04X%04X%04X';
-        return ( true === function_exists( $FUNCTION ))
-            ? trim( $FUNCTION(), $EXCL )
-            : sprintf(
-                $FMTGUID,
-                random_int( 0, 65535 ),
-                random_int( 0, 65535 ),
-                random_int( 0, 65535 ),
-                random_int( 16384, 20479 ),
-                random_int( 32768, 49151 ),
-                random_int( 0, 65535 ),
-                random_int( 0, 65535 ),
-                random_int( 0, 65535 )
-            );
+        $this->workData      = new KeyValueMgr();
+        $this->resultLog     = new KeyValueMgr();
     }
 
     /**
      * Package factory method
      *
-     * @param mixed $config
-     * @param mixed $logger
      * @param mixed $input
      * @return Package
      * @throws Exception
+     * @since 20220509 1.8.2
      */
-    public static function init(
-        mixed $config = null,
-        mixed $logger = null,
-        mixed $input = null
-    ) : Package
+    public static function init( mixed $input = null ) : Package
     {
-        return new self( $config, $logger, $input );
+        return new self( $input );
     }
 
     /**
@@ -245,70 +186,6 @@ class Package
     public function setCorrelationId( string $correlationId ) : Package
     {
         $this->correlationId = $correlationId;
-        return $this;
-    }
-
-    /**
-     * Return (mixed) config
-     *
-     * @return mixed
-     */
-    public function getConfig() : mixed
-    {
-        return $this->config;
-    }
-
-    /**
-     * Return bool, true if config is set, otherwise false
-     *
-     * @return bool
-     */
-    public function isConfigSet() : bool
-    {
-        return ( null !== $this->config );
-    }
-
-    /**
-     * Set (mixed) config
-     *
-     * @param mixed $config
-     * @return Package
-     */
-    public function setConfig( mixed $config ) : Package
-    {
-        $this->config = $config;
-        return $this;
-    }
-
-    /**
-     * Return logger
-     *
-     * @return mixed
-     */
-    public function getLogger() : mixed
-    {
-        return $this->logger;
-    }
-
-    /**
-     * Return bool, true if logger is set, otherwise false
-     *
-     * @return bool
-     */
-    public function isLoggerSet() : bool
-    {
-        return ( null !== $this->logger );
-    }
-
-    /**
-     * Set logger
-     *
-     * @param mixed $logger
-     * @return Package
-     */
-    public function setLogger( mixed $logger ) : Package
-    {
-        $this->logger = $logger;
         return $this;
     }
 
@@ -384,18 +261,16 @@ class Package
      * KeyValueMgr::get( key ) : mixed
      * KeyValueMgr::set( key, value ) : KeyValueMgr
      *
-     * @param string|null $key
+     * @param null|string $key
      * @return mixed KeyValueMgr|mixed|bool
      */
-    public function getWorkData( string $key = null ) : mixed
+    public function getWorkData( ? string $key = null ) : mixed
     {
-        switch( true ) {
-            case empty( $key ) :
-                return $this->workData;
-            case $this->isWorkDataKeySet( $key ) :
-                return $this->workData->get( $key );
-        } // end switch
-        return false;
+        return match( true ) {
+            empty( $key ) => $this->workData,
+            $this->isWorkDataKeySet( $key ) => $this->workData->get( $key ),
+            default       => false
+        };
     }
 
     /**
@@ -450,18 +325,16 @@ class Package
      * KeyValueMgr::get( key ) : mixed
      * KeyValueMgr::set( key, value ) : KeyValueMgr
      *
-     * @param string|null $key
+     * @param null|string $key
      * @return mixed  KeyValueMgr|mixed|bool
      */
-    public function getResultLog( string $key = null ) : mixed
+    public function getResultLog( ? string $key = null ) : mixed
     {
-        switch( true ) {
-            case empty( $key ) :
-                return $this->resultLog;
-            case $this->isResultLogKeySet( $key ) :
-                return $this->resultLog->get( $key );
-        } // end switch
-        return false;
+        return match( true ) {
+            empty( $key ) => $this->resultLog,
+            $this->isResultLogKeySet( $key ) => $this->resultLog->get( $key ),
+            default       => false
+        };
     }
 
     /**
@@ -509,30 +382,35 @@ class Package
     }
 
     /**
-     * Return string, property load status, eol-separated
+     * Return string, property load status (and input/output types), eol-separated (toString-method)
+     *
+     * @since 20220509 1.8.2
      */
     public function getLoadStatus() : string
     {
         static $PROPNAMES = [
             'timeStamp : ',
             'correlationId : ',
-            'config type : ',
-            'logger type : ',
             'input type : ',
             'output type : ',
             'workdata keys : ',
             'resultLog keys : ',
         ];
         static $D = '-';
-        static $C = ', ';
         $output  = $PROPNAMES[0] . number_format( $this->getTimestamp(), 6 ) . PHP_EOL;
         $output .= $PROPNAMES[1] . $this->getCorrelationId() . PHP_EOL;
-        $output .= $PROPNAMES[2] . ( $this->isConfigSet() ? gettype( $this->getConfig()) : $D ) . PHP_EOL;
-        $output .= $PROPNAMES[3] . ( $this->isLoggerSet() ? gettype( $this->getLogger()) : $D ) . PHP_EOL;
-        $output .= $PROPNAMES[4] . ( $this->isInputSet() ? gettype( $this->getInput()) : $D ) . PHP_EOL;
-        $output .= $PROPNAMES[5] . ( $this->isOutputSet() ? gettype( $this->getOutput()) : $D ) . PHP_EOL;
-        $output .= $PROPNAMES[6] . implode( $C, $this->getWorkDataKeys()) . PHP_EOL;
-        $output .= $PROPNAMES[7] . implode( $C, $this->getResultLogKeys()) . PHP_EOL;
+        $output .= $PROPNAMES[2] . ( $this->isInputSet() ? gettype( $this->getInput()) : $D ) . PHP_EOL;
+        $output .= $PROPNAMES[3] . ( $this->isOutputSet() ? gettype( $this->getOutput()) : $D ) . PHP_EOL;
+        if( $this->isWorkDataSet()) {
+            foreach( $this->getWorkDataKeys() as $key ) {
+                $output .= $PROPNAMES[4] . $key . $D .  $this->getWorkData( $key ) . PHP_EOL;
+            }
+        }
+        if( $this->isResultLogSet()) {
+            foreach( $this->getResultLogKeys() as $key ) {
+                $output .= $PROPNAMES[5] . $key . $D .  $this->getResultLog( $key ) . PHP_EOL;
+            }
+        }
         return $output;
     }
 }

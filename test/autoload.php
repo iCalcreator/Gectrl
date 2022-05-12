@@ -25,9 +25,33 @@
  *            You should have received a copy of the GNU Lesser General Public License
  *            along with Gectrl. If not, see <https://www.gnu.org/licenses/>.
  */
-namespace Kigkonsult\Gectrl\AcSrc;
-
-interface OtherInterface
-{
-    public const OTHER = 'other';
-}
+spl_autoload_register(
+    function( string $class ) {
+        static $BS      = '\\';
+        static $PHP     = '.php';
+        static $PREFIX  = 'Kigkonsult\\Gectrl\\';
+        static $SRC     = 'src';
+        static $SRCDIR  = null;
+        static $TEST    = 'test';
+        static $TESTDIR = null;
+        if( is_null( $SRCDIR )) {
+            $SRCDIR  = dirname( __DIR__ ) . DIRECTORY_SEPARATOR . $SRC . DIRECTORY_SEPARATOR;
+            $TESTDIR = dirname(__DIR__ ) . DIRECTORY_SEPARATOR . $TEST . DIRECTORY_SEPARATOR;
+        }
+        if( 0 != strncmp( $PREFIX, $class, 18 ))
+            return false;
+        $class = substr( $class, 18 );
+        if( false !== strpos( $class, $BS ))
+            $class = str_replace( $BS, DIRECTORY_SEPARATOR, $class );
+        $file = $SRCDIR . $class . $PHP;
+        if( file_exists( $file )) {
+            include $file;
+        }
+        else {
+            $file = $TESTDIR . $class . $PHP;
+            if( file_exists( $file )) {
+                include $file;
+            }
+        }
+    }
+);

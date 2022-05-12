@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
@@ -46,7 +46,7 @@ class PackageTest extends TestCase
      */
     public function packageTest1() : void
     {
-        $package = Package::init( self::$VAR1, self::$VAR2, self::$VAR3 );
+        $package = Package::init( self::$VAR1 );
 
         $this->assertIsFloat( $package->getTimestamp(), 'error 21' );
         $timeStamp = microtime( true );
@@ -62,17 +62,8 @@ class PackageTest extends TestCase
         $package->setCorrelationId( self::$VAR3 );
         $this->assertEquals( self::$VAR3, $package->getCorrelationId(), 'error 32');
 
-        $this->assertTrue( $package->isConfigSet(), 'error 41' );
-        $this->assertEquals( self::$VAR1, $package->getConfig(), 'error 42');
-        $package->setConfig( self::$VAR3 );
-        $this->assertEquals( self::$VAR3, $package->getConfig(), 'error 43');
-
-        $this->assertTrue( $package->isLoggerSet(), 'error 51' );
-        $this->assertEquals( self::$VAR2, $package->getLogger(), 'error 52');
-        $package->setLogger( self::$VAR3 );
-        $this->assertEquals( self::$VAR3, $package->getLogger(), 'error 53');
-
         $this->assertTrue( $package->isInputSet(), 'error 61' );
+        $this->assertEquals( self::$VAR1, $package->getInput(), 'error 63');
         $package->setInput( self::$VAR3 );
         $this->assertEquals( self::$VAR3, $package->getInput(), 'error 63');
 
@@ -81,22 +72,31 @@ class PackageTest extends TestCase
         $this->assertTrue( $package->isOutputSet(), 'error 72' );
         $this->assertEquals( self::$VAR3, $package->getOutput(), 'error 73');
 
-        $this->assertFalse( $package->isWorkDataSet(), 'error 80' );
-        $this->assertEquals( [], $package->getWorkDataKeys(), 'error 81' );
-        $this->assertFalse( $package->getWorkData( self::$VAR3 ), 'error 82' );
-        $this->assertFalse( $package->isWorkDataKeySet( self::$VAR3 ), 'error 83' );
+        $this->assertInstanceOf(KeyValueMgr::class, $package->getWorkData(), 'error 80' );
+        $this->assertFalse( $package->isWorkDataSet(), 'error 81' );
+        $this->assertEquals( [], $package->getWorkDataKeys(), 'error 82' );
+        $this->assertFalse( $package->getWorkData( self::$VAR3 ), 'error 83' );
+        $this->assertFalse( $package->isWorkDataKeySet( self::$VAR3 ), 'error 84' );
         $package->setWorkData( self::$VAR3, self::$VAR2 );
-        $this->assertTrue( $package->isWorkDataKeySet( self::$VAR3 ), 'error 84' );
-        $this->assertEquals( self::$VAR2, $package->getWorkData( self::$VAR3 ), 'error 85' );
-        $this->assertInstanceOf(KeyValueMgr::class, $package->getWorkData(), 'error 86' );
+        $this->assertTrue( $package->isWorkDataKeySet( self::$VAR3 ), 'error 85' );
+        $this->assertEquals( self::$VAR2, $package->getWorkData( self::$VAR3 ), 'error 86' );
 
-        $this->assertFalse( $package->isResultLogSet(), 'error 90' );
-        $this->assertEquals( [], $package->getResultLogKeys(), 'error 91' );
-        $this->assertFalse( $package->getResultLog( self::$VAR3 ), 'error 92' );
-        $this->assertFalse( $package->isResultLogKeySet( self::$VAR3 ), 'error 93' );
+        $packageToString = $package->getLoadStatus();
+        $this->assertStringContainsString( self::$VAR3, $packageToString, 'error 87' );
+        $this->assertStringContainsString( self::$VAR2, $packageToString, 'error 88' );
+        $package->getWorkData()->remove( self::$VAR3 );
+
+        $this->assertInstanceOf(KeyValueMgr::class, $package->getResultLog(), 'error 90' );
+        $this->assertFalse( $package->isResultLogSet(), 'error 91' );
+        $this->assertEquals( [], $package->getResultLogKeys(), 'error 92' );
+        $this->assertFalse( $package->getResultLog( self::$VAR3 ), 'error 93' );
+        $this->assertFalse( $package->isResultLogKeySet( self::$VAR3 ), 'error 94' );
         $package->setResultLog( self::$VAR3, self::$VAR2 );
-        $this->assertTrue( $package->isResultLogKeySet( self::$VAR3 ), 'error 94' );
-        $this->assertEquals( self::$VAR2, $package->getResultLog( self::$VAR3 ), 'error 95' );
-        $this->assertInstanceOf(KeyValueMgr::class, $package->getResultLog(), 'error 96' );
+        $this->assertTrue( $package->isResultLogKeySet( self::$VAR3 ), 'error 95' );
+        $this->assertEquals( self::$VAR2, $package->getResultLog( self::$VAR3 ), 'error 96' );
+
+        $packageToString = $package->getLoadStatus();
+        $this->assertStringContainsString( self::$VAR3, $packageToString, 'error 99' );
+        $this->assertStringContainsString( self::$VAR2, $packageToString, 'error 98' );
     }
 }

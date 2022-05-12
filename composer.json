@@ -1,6 +1,8 @@
 {
   "name": "kigkonsult/gectrl",
-  "description": "Generic controller, MVC",
+  "type": "library",
+  "description": "PHP generic controller for MVC, implements the strategy pattern",
+  "keywords": [ "Generic", "controller", "MVC", "strategy", "pattern" ],
   "minimum-stability": "stable",
   "license": "LGPL-3.0-or-later",
   "authors": [
@@ -19,13 +21,9 @@
     }
   ],
   "autoload": {
-    "files": [
-      "autoload.php"
-    ],
+    "files": [ "autoload.php" ],
     "psr-4": {
-      "Kigkonsult\\Gectrl\\": [
-        "src/"
-      ]
+      "Kigkonsult\\Gectrl\\": [ "src/" ]
     }
   },
     "require": {

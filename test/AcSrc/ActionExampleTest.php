@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
@@ -50,7 +50,7 @@ class ActionExampleTest extends Action0Base implements ActionClassInterface, Oth
     /**
      * @inheritDoc
      */
-    public static function evaluate( Package $package ) : bool
+    public static function evaluate( Package $package, mixed $config = null, mixed $logger = null ) : bool
     {
         return ( ! $package->isOutputSet());
     }
@@ -58,7 +58,7 @@ class ActionExampleTest extends Action0Base implements ActionClassInterface, Oth
     /**
      * @inheritDoc
      */
-    public static function doAction( Package $package ) : bool
+    public static function doAction( Package $package, mixed $config = null, mixed $logger = null ) : bool
     {
         $package->setWorkData( self::OTHER, true )
             ->setWorkData( self::class, parent::hello())

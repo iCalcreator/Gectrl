@@ -3,7 +3,7 @@
 ##  Interface ActionClassInterface
 
 Prescribe [Gectrl] strategy (application logic) actionClasses contract,<br>
-* applied as the ([Gectrl]) invoke of condition **evaluation** and opt, logic **doAction** methods
+* applied as the ([Gectrl]) invoke of condition `evaluation` and opt, logic `doAction` methods
 
 Classes implementing the interface may also
 * extend a baseClass
@@ -40,19 +40,23 @@ ___
 One or both of **evaluate** / **doAction** methods may be a factory method or not...
 
 ```
-evaluate( package )
+evaluate( package [, config [, logger ]] )
 ```
 * Evaluates application logic invoke condition 
 * ```package``` _[Package]_ (passed as reference)
+* ```config``` _mixed_
+* ```logger``` _mixed_
 * Return _bool_, true will cause [Gectrl] to invoke the _doAction_ method (below), false not
 * _static_
 
 ```
-doAction( package )
+doAction( package [, config [, logger ]] )
 ```
 * Application logic, will be invoked if method _evaluate_ (above) return true
 * ```package``` _[Package]_ (passed as reference)
-* Return _bool_, true will force [Gectrl] exec break and return the package, false not
+* ```config``` _mixed_
+* ```logger``` _mixed_
+* Return _bool_, true will force [Gectrl] to break the chain of invokes of (next) actionClass and return the package, false not
 * _static_
 
 ---

@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
@@ -30,12 +30,9 @@ namespace Kigkonsult\Gectrl;
 
 use Exception;
 use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionException;
 use RuntimeException;
 
 use function in_array;
-use function strcasecmp;
 use function sprintf;
 use function usort;
 
@@ -52,36 +49,54 @@ use function usort;
  *   using implementations of the (strategy) ActionClassInterface,
  *   invoking of actionClass condition 'evaluate' and logic 'doAction' methods,
  *   passing all data information in an encapsulated Package class instance
- *     input, output, config, logger etc
+ *     along with opt config and logger
  *
  * @package Kigkonsult\Gectrl
+ * @since 20220511 1.8.5
  */
 class Gectrl
 {
     /**
-     * @var callable
-     */
-    private static $SORTER = [ __CLASS__, 'actionClassSort' ];
-
-    /**
      * Array (string[]) FQCNs for actionClasses
      *
-     * @var string[]
+     * @var class-string<ActionClassInterface>[]
      */
     private array $actionClasses = [];
 
     /**
-     * @var Package
+     * @var bool
      */
-    private Package $package;
+    private bool $actionClassesCheck = false;
+
+    /**
+     * @var null|Package
+     */
+    private ? Package $package = null;
+
+    /**
+     * Opt any config
+     *
+     * @var null|mixed
+     * @since 20220509 1.8.2
+     */
+    private mixed $config = null;
+
+    /**
+     * Opt any logger
+     *
+     * @var null|mixed
+     * @since 20220509 1.8.2
+     */
+    private mixed $logger = null;
 
     /**
      * Gectrl constructor
      *
      * @param mixed $config
      * @param mixed $logger
-     * @param string[] $actionClasses
+     * @param class-string<ActionClassInterface>[] $actionClasses
      * @throws Exception
+     * @since 20220510 1.8.4
      */
     public function __construct(
         mixed $config = null,
@@ -89,7 +104,12 @@ class Gectrl
         ? array $actionClasses = []
     )
     {
-        $this->setPackage( new Package( $config, $logger ));
+        if( null !== $config ) {
+            $this->config = $config;
+        }
+        if( null !== $logger ) {
+            $this->logger = $logger;
+        }
         if( ! empty( $actionClasses )) {
             $this->setActionClasses( $actionClasses );
         }
@@ -100,9 +120,10 @@ class Gectrl
      *
      * @param mixed    $config
      * @param mixed    $logger
-     * @param string[] $actionClasses
+     * @param class-string<ActionClassInterface>[] $actionClasses
      * @return Gectrl
      * @throws Exception
+     * @since 20220509 1.8.2
      */
     public static function init(
         mixed $config = null,
@@ -114,6 +135,41 @@ class Gectrl
     }
 
     /**
+     * Process ONE input transaction
+     *
+     * @param mixed $input   any kind of input (scalar/array/object) or a Package instance
+     * @return Package
+     * @throws Exception
+     * @throws RuntimeException
+     * @since 20220511 1.8.5
+     */
+    public function processOne( mixed $input ) : Package
+    {
+        $this->setInput( $input );
+        return $this->main();
+    }
+
+    /**
+     * Process MULTIPLE input transactions
+     *
+     * Empty input array allowed, returns empty array
+     *
+     * @param mixed[]|Package[] $input   any kind of input, array of scalar/array/object or Package[]
+     * @return Package[]
+     * @throws Exception
+     * @throws RuntimeException
+     * @since 20220511 1.8.5
+     */
+    public function processMany( array $input ) : array
+    {
+        $output = [];
+        foreach( $input as $packageInput ) {
+            $output[] = $this->processOne( $packageInput );
+        }
+        return $output;
+    }
+
+    /**
      * Main method, assert Gectrl instance, invoke actionClass:evaluate/doAction in order
      *
      * Accepts any kind of input (scalar/array/object)
@@ -121,76 +177,48 @@ class Gectrl
      * OR
      *   a (replacing) externally created package class instance
      *
-     * @param mixed $input   any kind of input (scalar/array/object) or a Package instance
+     * @param mixed $input   any kind of input, scalar/array/object or a Package instance
      * @return Package
+     * @throws InvalidArgumentException
      * @throws RuntimeException
+     * @since 20220511 1.8.5
      */
     public function main( mixed $input = null ) : Package
     {
-        switch( true ) {
-            case ( null === $input ) :
-                break;
-            case ( $input instanceof Package ) :
-                $this->setPackage( $input );
-                break;
-            default :
-                $this->package->setInput( $input );
-                break;
-        } // end switch
-        $this->assert();
-        usort( $this->actionClasses, self::$SORTER );
+        static $FMT1 = 'No Gectrl (Package input) set';
+        static $FMT2 = 'No Gectrl actions set';
+        if( null !== $input ) {
+            $this->setInput( $input );
+        }
+        elseif(( null === $this->package )) {
+            throw new RuntimeException( $FMT1, 11 );
+        }
+        if( ! $this->actionClassesCheck && ! $this->isActionClassSet()) {
+            throw new RuntimeException( $FMT2, 12 );
+        }
         foreach( $this->actionClasses as $actionClass ) {
-            if( false === $actionClass::{ActionClassInterface::EVALUATE}( $this->package )) {
-                continue;
+            if( false === $actionClass::{ActionClassInterface::EVALUATE}(
+                $this->package,
+                $this->config,
+                $this->logger
+                )) {
+                continue; // skip this action
             }
-            if( true === $actionClass::{ActionClassInterface::DOACTION}( $this->package )) {
-                break;
+            if( true === $actionClass::{ActionClassInterface::DOACTION}(
+                $this->package,
+                $this->config,
+                $this->logger
+                )) {
+                break; // true force break exec of actions
             }
         } // end foreach
         return $this->package;
     }
 
     /**
-     * Sort ActionClassInterfaces (i.e. string FQCNs) on method getExecOrder result
+     * Return (string[]) actionClasses (FQCNs) sorted om execOrder (and FQCN)
      *
-     * If equal, sort on actionClasses name
-     *
-     * @param string $a
-     * @param string $b
-     * @return int
-     */
-    private static function actionClassSort( string $a, string $b ) : int
-    {
-        $aeo = $a::getExecOrder();
-        $beo = $b::getExecOrder();
-        if( $aeo === $beo ) {
-            return strcasecmp( $a, $b );
-        }
-        return ( $aeo < $beo ) ? -1 : 1;
-    }
-
-    /**
-     * Assert input and actionClasses are set
-     *
-     * @return void
-     * @throws RuntimeException
-     */
-    private function assert() : void
-    {
-        static $FMT1 = 'No Gectrl input';
-        static $FMT2 = 'No Gectrl actions';
-        if( ! $this->package->isInputSet()) {
-            throw new RuntimeException( $FMT1, 11 );
-        }
-        if( ! $this->isActionClassSet()) {
-            throw new RuntimeException( $FMT2, 12 );
-        }
-    }
-
-    /**
-     * Return (string[]) actionClasses (FQCNs)
-     *
-     * @return string[]  i.e. ActionClassInterface class FQCN list
+     * @return class-string<ActionClassInterface>[]  i.e. ActionClassInterface class FQCN list
      */
     public function getActionClasses() : array
     {
@@ -208,7 +236,11 @@ class Gectrl
         if( ! empty( $fqcn )) {
             return in_array( $fqcn, $this->actionClasses, true );
         }
-        return ( ! empty( $this->actionClasses ));
+        if( ! empty( $this->actionClasses )) {
+            $this->actionClassesCheck = true;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -217,57 +249,18 @@ class Gectrl
      * Opt. traits / interfaces / abstract classes are ignored
      * Throws exception on Reflection error
      *
-     * @param string $actionClass   ActionClassInterface class FQCN
+     * @param class-string<ActionClassInterface> $actionClass   ActionClassInterface class FQCN
      * @return Gectrl
      * @throws InvalidArgumentException
+     * @since 20220509 1.8.1
      */
     public function addActionClass( string $actionClass ) : Gectrl
     {
-        if( self::assertActionClass( $actionClass )) {
+        if( Util::assertActionClass( $actionClass ) ) {
             $this->actionClasses[] = $actionClass;
+            usort( $this->actionClasses, Util::$ACTIONCLASSSORTER );
         }
         return $this;
-    }
-
-    /**
-     * Asserts actionClass
-     *
-     * Return true for class implementing ActionClassInterface,
-     *   trait / interface / abstract class returns false
-     * Throws exception on Reflection error
-     *
-     * @link https://www.php.net/manual/en/language.operators.type.php#102988
-     * @param string $actionClass   ActionClassInterface class FQCN
-     * @return bool
-     * @throws InvalidArgumentException
-     */
-    private static function assertActionClass( string $actionClass  ) : bool
-    {
-        static $FMT1 = 'Reflectionerror for %s, %s';
-        static $FMT8 = 'Class %s implements NOT ActionClassInterface';
-        try {
-            $reflectionClass = new ReflectionClass( $actionClass );
-        }
-        catch( ReflectionException $re ) {
-            throw new InvalidArgumentException(
-                sprintf( $FMT1, $actionClass, $re->getMessage()),
-                21,
-                $re
-            );
-        }
-        switch( true ) {
-            case ( true === $reflectionClass->isTrait()):
-                return false;
-            case $reflectionClass->isInterface() :
-                return false;
-            case $reflectionClass->isAbstract() :
-                return false;
-            case $reflectionClass->implementsInterface( ActionClassInterface::class  ) :
-                break;
-            default :
-                throw new InvalidArgumentException( sprintf( $FMT8, $actionClass ), 28 );
-        }
-        return true;
     }
 
     /**
@@ -276,7 +269,7 @@ class Gectrl
      * For extracting namespace(s) for actionsClasses,
      * you may use https://gitlab.com/hpierce1102/ClassFinder
      *
-     * @param string[] $actionClasses  ActionClassInterface class FQCN list
+     * @param class-string<ActionClassInterface>[] $actionClasses  ActionClassInterface class FQCN list
      * @return Gectrl
      * @throws InvalidArgumentException
      */
@@ -292,9 +285,9 @@ class Gectrl
     /**
      * Return Package
      *
-     * @return Package
+     * @return null|Package
      */
-    public function getPackage() : Package
+    public function getPackage() : ? Package
     {
         return $this->package;
     }
@@ -302,12 +295,107 @@ class Gectrl
     /**
      * Set (replace) Package
      *
-     * @param Package $package
+     * @param mixed|Package $input
+     * @throws InvalidArgumentException
      * @return Gectrl
+     * @since 20220511 1.8.5
+     */
+    public function setInput( mixed $input ) : Gectrl
+    {
+        if( ! $input instanceof Package ) {
+            try {
+                $input = new Package( $input );
+            }
+            catch( Exception $e ) {
+                throw new InvalidArgumentException( $e->getMessage(), 31, $e );
+            }
+        }
+        $this->setPackage( $input );
+        return $this;
+    }
+
+    /**
+     * Set (replace) Package, input MUST be set
+     *
+     * @param Package $package
+     * @throws InvalidArgumentException
+     * @return Gectrl
+     * @since 20220511 1.8.5
      */
     public function setPackage( Package $package ) : Gectrl
     {
+        static $FMT4 = 'No input set in Package %s / %f';
+        if( ! $package->isInputSet()) {
+            throw new InvalidArgumentException(
+                sprintf( $FMT4, $package->getCorrelationId(), $package->getTimestamp()),
+                41
+            );
+        }
         $this->package = $package;
+        return $this;
+    }
+
+    /**
+     * Return (mixed) config
+     *
+     * @return mixed
+     */
+    public function getConfig() : mixed
+    {
+        return $this->config;
+    }
+
+    /**
+     * Return bool, true if config is set, otherwise false
+     *
+     * @return bool
+     */
+    public function isConfigSet() : bool
+    {
+        return ( null !== $this->config );
+    }
+
+    /**
+     * Set (mixed) config
+     *
+     * @param mixed $config
+     * @return Gectrl
+     */
+    public function setConfig( mixed $config ) : Gectrl
+    {
+        $this->config = $config;
+        return $this;
+    }
+
+    /**
+     * Return logger
+     *
+     * @return mixed
+     */
+    public function getLogger() : mixed
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Return bool, true if logger is set, otherwise false
+     *
+     * @return bool
+     */
+    public function isLoggerSet() : bool
+    {
+        return ( null !== $this->logger );
+    }
+
+    /**
+     * Set logger
+     *
+     * @param mixed $logger
+     * @return Gectrl
+     */
+    public function setLogger( mixed $logger ) : Gectrl
+    {
+        $this->logger = $logger;
         return $this;
     }
 }

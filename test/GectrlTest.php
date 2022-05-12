@@ -5,7 +5,7 @@
  * This file is a part of Gectrl.
  *
  * @author    Kjell-Inge Gustafsson, kigkonsult <ical@kigkonsult.se>
- * @copyright 2021 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
+ * @copyright 2021-22 Kjell-Inge Gustafsson, kigkonsult, All rights reserved
  * @link      https://kigkonsult.se
  * @license   Subject matter of licence is the software Gectrl.
  *            The above copyright, link, package and version notices,
@@ -48,15 +48,21 @@ class GectrlTest extends TestCase
     public function gectrlTest1() : void
     {
         $gectrl   = Gectrl::init( self::$VAR1, self::$VAR2 );
-        $package1 = $gectrl->getPackage();
+        $package1 = new Package();
 
-        $this->assertTrue( $package1->isConfigSet(), 'error 41' );
-        $this->assertEquals( self::$VAR1, $package1->getConfig(), 'error 142');
+        $this->assertTrue( $gectrl->isConfigSet(), 'error 41' );
+        $this->assertEquals( self::$VAR1, $gectrl->getConfig(), 'error 142');
 
-        $this->assertTrue( $package1->isLoggerSet(), 'error 51' );
-        $this->assertEquals( self::$VAR2, $package1->getLogger(), 'error 152');
+        $gectrl->setConfig( self::$VAR3 );
+        $this->assertEquals( self::$VAR3, $gectrl->getConfig(), 'error 143');
 
-        $gectrl->setPackage( Package::init());
+        $this->assertTrue( $gectrl->isLoggerSet(), 'error 51' );
+        $this->assertEquals( self::$VAR2, $gectrl->getLogger(), 'error 152');
+
+        $gectrl->setLogger( self::$VAR3 );
+        $this->assertEquals( self::$VAR3, $gectrl->getLogger(), 'error 153');
+
+        $gectrl->setPackage( Package::init( self::$VAR3 ));
         $this->assertNotEquals(
             $package1->getTimestamp(),
             $gectrl->getPackage()->getTimestamp(),
@@ -83,11 +89,30 @@ class GectrlTest extends TestCase
     }
 
     /**
+     * Testing Gectrl, main, Package with no input
+     *
+     * @test
+     * @throws Exception
+     */
+    public function gectrlTest2() : void
+    {
+        $detected = false;
+        try {
+            Gectrl::init()->setPackage( Package::init());
+        }
+        catch( InvalidArgumentException $ie ) {
+            $detected = true;
+        }
+        $this->assertTrue( $detected, 'error 211' );
+    }
+
+    /**
      * Testing Gectrl::main
      *
      * @test
+     * @throws Exception
      */
-    public function gectrlTest2() : void
+    public function gectrlTest3() : void
     {
         $actionClasses = [
             AcSrc\OtherInterface::class,
@@ -106,38 +131,40 @@ class GectrlTest extends TestCase
 
         $this->assertTrue(
             $gectrl->isActionClassSet(),
-            'error 211'
+            'error 311'
         );
         $this->assertTrue(
             $gectrl->isActionClassSet( AcSrc\ActionExampleTest::class ),
-            'error 212a'
+            'error 312a'
         );
         $this->assertFalse(
             $gectrl->isActionClassSet( AcSrc\OtherInterface::class ),
-            'error 212b'
+            'error 312b'
         );
         $this->assertFalse(
             $gectrl->isActionClassSet( AcSrc\OtherTrait::class ),
-            'error 212c'
+            'error 312c'
         );
 
         $this->assertNotCount(
-            count( $actionClasses ), $gectrl->getActionClasses(), 'error 214'
+            count( $actionClasses ), $gectrl->getActionClasses(), 'error 321'
         );
 
         $package = $gectrl->main( self::$VAR1 );
 
         $this->assertTrue( $package->isWorkDataKeySet( AcSrc\ActionExampleTest::class ), 'error 221' );
         $this->assertTrue( $package->isResultLogKeySet( AcSrc\ActionExampleTest::class ), 'error 222' );
-        $this->assertEquals( $package->getInput(), $package->getOutput(), 'error 223' );
+        $this->assertEquals( $package->getInput(), $package->getOutput(), 'error 331' );
     }
 
     /**
-     * Testing Gectrl:main assert 1, no input/no ectionClasses
+     * Testing Gectrl:main assert 1, no input/no ActionClasses
      *
      * @test
+     * @throws Exception
+     * @throws Exception
      */
-    public function gectrlTest3() : void
+    public function gectrlTest4() : void
     {
         $detected = false;
         try {
@@ -146,7 +173,7 @@ class GectrlTest extends TestCase
         catch( RuntimeException $re ) {
             $detected = true;
         }
-        $this->assertTrue( $detected, 'error 311' );
+        $this->assertTrue( $detected, 'error 411' );
 
         $detected = false;
         try {
@@ -155,15 +182,16 @@ class GectrlTest extends TestCase
         catch( RuntimeException $re ) {
             $detected = true;
         }
-        $this->assertTrue( $detected, 'error 321' );
+        $this->assertTrue( $detected, 'error 421' );
     }
 
     /**
      * Testing Gectrl, actionClass assert 2, invalid actionClasses
      *
      * @test
+     * @throws Exception
      */
-    public function gectrlTest4() : void
+    public function gectrlTest5() : void
     {
         $detected = false;
         try {
@@ -176,7 +204,7 @@ class GectrlTest extends TestCase
         catch( InvalidArgumentException $ie ) {
                 $detected = true;
         }
-        $this->assertTrue( $detected, 'error 411' );
+        $this->assertTrue( $detected, 'error 511' );
 
         $detected = false;
         try {
@@ -189,26 +217,56 @@ class GectrlTest extends TestCase
         catch( InvalidArgumentException $ie ) {
             $detected = true;
         }
-        $this->assertTrue( $detected, 'error 421' );
+        $this->assertTrue( $detected, 'error 521' );
     }
 
     /**
-     * Testing Gectrl, main, package input
+     * Testing Gectrl, processOne (main)
      *
      * @test
      * @throws Exception
      */
-    public function gectrlTest5() : void
+    public function gectrlTest6() : void
     {
-        $package1 = Package::init( self::$VAR1, self::$VAR2, self::$VAR3 );
+        $package1 = Package::init( self::$VAR1 );
 
         $package2 = Gectrl::init(
             null,
             null,
             [ AcSrc\ActionExampleTest::class ]
         )
-            ->main( $package1 );
+            ->processOne( $package1 );
 
-        $this->assertEquals( self::$VAR3, $package2->getOutput(), 'error 511');
+        $this->assertEquals( self::$VAR1, $package2->getOutput(), 'error 611');
+    }
+
+    /**
+     * Testing Gectrl, processMany
+     *
+     * @test
+     * @throws Exception
+     */
+    public function gectrlTest7() : void
+    {
+        $transactions = [
+            self::$VAR1,
+            self::$VAR2,
+            self::$VAR3
+        ];
+        $input = [];
+        foreach( $transactions as $trans ) {
+            $input[] = Package::init( $trans );
+        }
+
+        $output = Gectrl::init(
+            null,
+            null,
+            [ AcSrc\ActionExampleTest::class ]
+        )
+            ->processMany( $input );
+
+        foreach( $transactions as $tix => $trans ) {
+            $this->assertEquals( $trans, $output[$tix]->getOutput(), 'error 61' . $tix );
+        }
     }
 }

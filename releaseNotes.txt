@@ -1,6 +1,13 @@
 
-1.8    PHP 8.0
+1.2    PHP 7 (PHPStan checks)
 
 1.6    PHP 7.4
 
-1.2    PHP 7 (PHPStan checks)
+1.8    PHP 8.0
+
+1.8.1  Gectrl::main actionClasses sort moved to Gectrl::addActionClass
+1.8.2  Package config/logger removed, used as new args
+       at ActionClassInterface::evaluate/doAction invoke
+1.8.3  Altered Package::getGuid generation
+1.8.4  Gecrl Package generation moved to Gectrl::setInput
+1.8.5  new Gecrl::processOne() and Gecrl::processOne() methods
